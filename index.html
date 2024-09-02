@@ -123,7 +123,8 @@
                 return isValid;
             }
 
-            $(".generate_qr").click(function() {
+            $(".generate_qr").click(function(event) {
+                event.preventDefault(); // Prevent form submission
                 if (validateFields()) {
                     $(".form").hide();
                     $(".qr_code").show();
@@ -132,6 +133,15 @@
                     var upi = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + link;
                     console.log(upi);
                     $(".get_qr").attr("src", upi);
+                } else {
+                    alert("Please fill in all required fields.");
+                }
+            });
+
+            $(".submit_form").click(function() {
+                if (validateFields()) {
+                    // Optionally you can validate QR Code here if needed
+                    $(".form").submit(); // Submit the form
                 } else {
                     alert("Please fill in all required fields.");
                 }
@@ -164,13 +174,16 @@
                 <div class="error">This field is required</div>
             </div>
             <div class="flex m20">
-                <button type="submit" class="generate_qr">NEXT</button>
+                <button type="button" class="generate_qr">NEXT</button>
             </div>
         </form>
         <div class="qr_code m20">
-            <p>Scan the QR Code with any UPI App and pay the amount then download the source code.</p>
+            <p>Scan the QR Code with any UPI App and pay the amount then click 'Submit' to complete the form.</p>
             <center><img src="" alt="QR CODE" class="get_qr m10"></center>
             <center><img src="" class="im m10"></center>
+            <div class="flex m20">
+                <button type="button" class="submit_form">Submit</button>
+            </div>
         </div>
     </section>
 </body>
