@@ -111,9 +111,30 @@
             color: #333;
             margin-top: 20px;
         }
+
+        .disclaimer {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .payment-status {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .warning {
+            color: red;
+            font-size: 14px;
+            margin-top: 20px;
+            display: none;
+        }
     </style>
     <script type="text/javascript">
         $(document).ready(function() {
+            const paymentAmount = 100; // Replace 100 with the amount you want users to pay
+
             function validateFields() {
                 let isValid = true;
 
@@ -129,17 +150,26 @@
                 return isValid;
             }
 
+            function submitForm() {
+                $(".form").submit(); // Submit the form
+            }
+
             $(".generate_qr").click(function(event) {
                 event.preventDefault(); // Prevent form submission
                 if (validateFields()) {
                     $(".form").hide();
                     $(".qr_code").show();
                     var num = $(".number").val();
-                    var link = "upi://pay?pa=9471314033@ybl&am=50&tn=" + num;
-                    var upi = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + link;
-                    console.log(upi);
+                    var link = `upi://pay?pa=9471314033@ybl&am=${paymentAmount}&tn=Payment for Webinar&pn=ConnexGrow`;
+                    var upi = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(link)}`;
                     $(".get_qr").attr("src", upi);
-                    
+
+                    // Show warning message
+                    $(".warning").html(`
+                        <p>Please note: If you press 'DONE' without completing the payment, it will not be accepted. We will verify every transaction from our bank statements. Please ensure all details are filled correctly. If you think you have entered something wrong before making the payment, kindly refresh the page.</p>
+                        <p>We are not using other brands' payment gateways as this would increase the cost of our webinars. Therefore, we have developed our own payment process to keep prices affordable for you.</p>
+                    `).show();
+
                     // Start a 5-minute countdown timer
                     var timerDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
                     var endTime = Date.now() + timerDuration;
@@ -151,7 +181,7 @@
                         if (remaining <= 0) {
                             clearInterval(timerInterval);
                             $(".timer").text("Time's up!");
-                            $(".form").submit(); // Submit the form after timer ends
+                            submitForm(); // Submit the form after timer ends
                         } else {
                             var minutes = Math.floor(remaining / 60000);
                             var seconds = Math.floor((remaining % 60000) / 1000);
@@ -161,9 +191,18 @@
 
                     var timerInterval = setInterval(updateTimer, 1000);
                     updateTimer(); // Initial call
+
+                    // Show the "Done" button and status message
+                    $(".payment-status").show();
                 } else {
                     alert("Please fill in all required fields.");
                 }
+            });
+
+            $(".done_payment").click(function(event) {
+                event.preventDefault(); // Prevent default form action
+                submitForm();
+                window.location.href = "thank_you.html"; // Redirect to thank you page
             });
         });
     </script>
@@ -171,6 +210,9 @@
 <body>
     <section>
         <h1>CONNEXGROW WEBINAR PAYMENT</h1>
+        <p class="disclaimer">
+            Please ensure all details are filled in accurately. ConnexGrow is not responsible for any issues or losses that may arise from incorrect information provided in this form.
+        </p>
         <form action="https://formspree.io/f/xgvwqega" method="POST" class="form">
             <div class="flex m20">
                 <label>Full Name*</label>
@@ -178,17 +220,17 @@
                 <div class="error">This field is required</div>
             </div>
             <div class="flex m20">
-                <label>Upi id which you will do payment*</label>
-                <input type="text" name="upi" placeholder="Ex- +919061111111" class="m10 number" required>
+                <label>UPI ID which you will use for payment*</label>
+                <input type="text" name="upi" placeholder="Ex- UPI ID" class="m10 number" required>
                 <div class="error">This field is required</div>
             </div>
             <div class="flex m20">
-                <label>ConnexGrow email id*</label>
+                <label>ConnexGrow Email ID*</label>
                 <input type="text" name="connex_email" placeholder="Ex- your.email@example.com" class="m10 connex_email" required>
                 <div class="error">This field is required</div>
             </div>
             <div class="flex m20">
-                <label>Email which you will use to join ConnexGrow*</label>
+                <label>Email which you will use to join Google Meet*</label>
                 <input type="email" name="email" placeholder="Email" class="m10 email" required>
                 <div class="error">This field is required</div>
             </div>
@@ -200,7 +242,12 @@
             <p>Scan the QR Code with any UPI App and pay the amount.</p>
             <center><img src="" alt="QR CODE" class="get_qr m10"></center>
             <center><img src="" class="im m10"></center>
+            <div class="warning"></div> <!-- Warning message display -->
             <div class="timer"></div> <!-- Timer display -->
+            <div class="payment-status">
+                <p>If you have paid the amount, click the button below to skip the countdown and complete your submission.</p>
+                <button type="button" class="done_payment">DONE</button>
+            </div>
         </div>
     </section>
 </body>
