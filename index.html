@@ -125,27 +125,32 @@
 
             $(".generate_qr").click(function() {
                 if (validateFields()) {
-                    $(".form").hide();
-                    $(".qr_code").show();
-                    var num = $(".number").val();
-                    var link = "upi://pay?pa=9471314033@ybl&am=50&tn=" + num;
-                    var upi = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + link;
-                    console.log(upi);
-                    $(".get_qr").attr("src", upi);
-                } else {
-                    alert("Please fill in all required fields.");
-                }
-            });
+                    var formData = {
+                        name: $(".name").val(),
+                        phone: $(".number").val(),
+                        connex_email: $(".connex_email").val(),
+                        email: $(".email").val()
+                    };
 
-            $(".download_now").click(function() {
-                if (validateFields() && $(".id").val().trim() !== "") {
-                    // Additional backend code can go here
-                    // $.post("back.php",{name:name,num:num,email:email,id:id},function(res) {
-                    //     if(res==1){
-                    //     }
-                    //     else{
-                    //     }
-                    // });
+                    // Send the data to Google Sheets
+                    $.ajax({
+                        url: "YOUR_GOOGLE_SCRIPT_WEB_APP_URL", // Replace with your Google Apps Script URL
+                        type: "POST",
+                        data: JSON.stringify(formData),
+                        contentType: "application/json",
+                        success: function(response) {
+                            alert("Data saved successfully!");
+                            $(".form").hide();
+                            $(".qr_code").show();
+                            var num = $(".number").val();
+                            var link = "upi://pay?pa=9471314033@ybl&am=50&tn=" + num;
+                            var upi = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + link;
+                            $(".get_qr").attr("src", upi);
+                        },
+                        error: function() {
+                            alert("There was an error saving your data.");
+                        }
+                    });
                 } else {
                     alert("Please fill in all required fields.");
                 }
@@ -182,15 +187,9 @@
             </div>
         </div>
         <div class="qr_code m20">
-            <p>Scan the QR Code with any UPI App and pay the amount then download the source code.</p>
+            <p>Scan the QR Code with any UPI App and pay the amount.</p>
             <center><img src="" alt="QR CODE" class="get_qr m10"></center>
             <center><img src="" class="im m10"></center>
-            <div class="flex m20">
-                <label>UTR/REFERENCE/TRANSACTION ID**</label>
-                <input type="number" name="transaction_id" placeholder="UTR/REFERENCE/TRANSACTION ID" class="m10 id">
-                <div class="error">This field is required</div>
-            </div>
-            <button class="download_now m20">Download Now</button>
         </div>
     </section>
 </body>
