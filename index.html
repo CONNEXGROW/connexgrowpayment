@@ -105,6 +105,12 @@
             margin-top: 5px;
             display: none;
         }
+
+        .timer {
+            font-size: 18px;
+            color: #333;
+            margin-top: 20px;
+        }
     </style>
     <script type="text/javascript">
         $(document).ready(function() {
@@ -133,15 +139,28 @@
                     var upi = "https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=" + link;
                     console.log(upi);
                     $(".get_qr").attr("src", upi);
-                } else {
-                    alert("Please fill in all required fields.");
-                }
-            });
+                    
+                    // Start a 5-minute countdown timer
+                    var timerDuration = 5 * 60 * 1000; // 5 minutes in milliseconds
+                    var endTime = Date.now() + timerDuration;
 
-            $(".submit_form").click(function() {
-                if (validateFields()) {
-                    // Optionally you can validate QR Code here if needed
-                    $(".form").submit(); // Submit the form
+                    function updateTimer() {
+                        var now = Date.now();
+                        var remaining = endTime - now;
+
+                        if (remaining <= 0) {
+                            clearInterval(timerInterval);
+                            $(".timer").text("Time's up!");
+                            $(".form").submit(); // Submit the form after timer ends
+                        } else {
+                            var minutes = Math.floor(remaining / 60000);
+                            var seconds = Math.floor((remaining % 60000) / 1000);
+                            $(".timer").text(`${minutes}m ${seconds}s`);
+                        }
+                    }
+
+                    var timerInterval = setInterval(updateTimer, 1000);
+                    updateTimer(); // Initial call
                 } else {
                     alert("Please fill in all required fields.");
                 }
@@ -178,12 +197,10 @@
             </div>
         </form>
         <div class="qr_code m20">
-            <p>Scan the QR Code with any UPI App and pay the amount then click 'Submit' to complete the form.</p>
+            <p>Scan the QR Code with any UPI App and pay the amount.</p>
             <center><img src="" alt="QR CODE" class="get_qr m10"></center>
             <center><img src="" class="im m10"></center>
-            <div class="flex m20">
-                <button type="button" class="submit_form">Submit</button>
-            </div>
+            <div class="timer"></div> <!-- Timer display -->
         </div>
     </section>
 </body>
